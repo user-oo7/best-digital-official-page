@@ -13,7 +13,7 @@
   --bg-footer: var(--bg-main);
   
   /* CARDS & SOFT BOXES (সাদা এবং হালকা রঙের প্রিমিয়াম কন্ট্রাস্ট) */
-  --bg-card: #fffffe;
+  --bg-card: #ffffffc4;
   --bg-soft: #f8ff6a;
   --bg-journey: var(--bg-card);
   --bg-journey-highlight: #f0fdfa;
@@ -35,8 +35,8 @@
   /* MAIN TEXT (কুচকুচে কালোর বদলে মডার্ন 'ডিপ স্লেট') */
   --text-main: #09172c;
   --text-muted: #1f1e1e;
-  --text-link: #0f766e;
-  --text-link-hover: #00d0ff;
+  --text-link: #ffffffcb;
+  --text-link-hover: #cf1c1c;
   --text-on-card: #000;
   --text-on-header: var(--text-main);
   --text-on-footer: var(--text-muted);
@@ -47,14 +47,14 @@
   --text-scope-note: #475569;
   --text-banner: #00574f;
   --text-empty: var(--text-muted);
-  --text-decorative: #94a3b8;
-  --text-step-number: #cbd5e1;
-  --text-diagram-arrow: #94a3b8;
+  --text-decorative: var(--accent);
+  --text-step-number: #005f43;
+  --text-diagram-arrow: #00a816;
 
   /* BRAND (মার্কেটিং ও ট্র্যাকিংয়ের জন্য বিশ্বস্ত 'ডিপ টিল' কালার) */
-  --accent: #0f766e;
-  --accent-soft: #5eead4;
-  --price-color: var(--accent);
+  --accent: #f4f7f7;
+  --accent-soft: #010303;
+  --price-color: var(--btn-primary-bg);
 
   /* PRIMARY BUTTON */
   --btn-primary-bg: #0f766e;
@@ -73,7 +73,7 @@
   --btn-secondary-hover-border: #5eead4;
 
   /* LIGHT BUTTON */
-  --btn-light-bg: #ffffff;
+  --btn-light-bg: #ffffff9d;
   --btn-light-hover: #f1f5f9;
   --btn-light-text: #475569;
   --btn-light-hover-text: #1e293b;
@@ -333,7 +333,7 @@ footer {
 }
 
 footer .text-button {
-  color: var(--accent-soft);
+  color: #c9c9c9;
 }
 
 body::before,
@@ -844,7 +844,7 @@ header {
 .problem::after {
   content: "↗";
   flex-shrink: 0;
-  color: var(--accent);
+  color: #000;
   font-size: 1.3rem;
 }
 
@@ -852,6 +852,9 @@ header {
   border-color: var(--border-selected);
   background: var(--bg-selected);
   color: var(--text-selected);
+}
+.problem[aria-pressed="true"]::after {
+  color: #ffffff !important;
 }
 
 .recommendation {
@@ -922,7 +925,7 @@ header {
 
 .card-label {
   margin-bottom: 9px;
-  color: var(--accent);
+  color: #00574f;
   font-size: .72rem;
   text-transform: uppercase;
   letter-spacing: .1em;
@@ -1753,6 +1756,9 @@ footer {
   bottom: 0;
   left: 0;
   box-sizing: border-box;
+}
+.external-contact a {
+  color: #ffffffbe !important; 
 }
 </style>
 <script>
