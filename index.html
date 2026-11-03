@@ -1810,7 +1810,6 @@ footer {
 const CONFIG = Object.freeze({endpoint:'https://script.google.com/macros/s/AKfycby9bb4MV50Cdh0MDQkfbzKSWalkXBpLfqRUMiA8ZMuwc_aw8FxKIrhIbb3TGI2_tPoNwA/exec', brand:'BEST DIGITAL lab', whatsapp:'+8801581928880', email:'geee71700@gmail.com'});
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const state={data:{Projects:[],Evidence:[],Packages:[],Lists:[]},status:{},loaded:false,loading:false,filter:'All',problem:-1,view:'home',lastAttempt:0};
-const problems=[['Message আসে, order কম','PKG-DIAG','আগে funnel ও offer-এর বাধা চিহ্নিত করে কোন পরিবর্তন আগে দরকার তা বুঝুন।'],['Tracking-এর সংখ্যায় ভরসা পাচ্ছেন না','PKG-TRACK','সম্মত event plan, browser/server setup ও technical verification নিয়ে আলোচনা করুন।'],['একটি product-এর জন্য সহজ buying journey দরকার','PKG-FUNNEL','Offer, প্রয়োজনীয় তথ্য ও order path একটি focused page-এ সাজানো যায়।'],['Lead আসে, follow-up ঠিকমতো হয় না','PKG-LEAD','Qualification, record routing ও সম্মত alert channel-এর scope যাচাই করুন।']];
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function button(text,fn,cls='button secondary'){const b=el('button',cls,text);b.type='button';b.addEventListener('click',fn);return b;}
 function safeURL(s){try{const u=new URL(String(s));return u.protocol==='https:'&&!u.username&&!u.password&&u.hostname.includes('.')&&!/[\s<>"'\\]/.test(s)?u.href:'';}catch(_){return '';}}
@@ -1848,7 +1847,57 @@ if (compact) {
 }                                      
   if(!compact){const list=el('ul','deliverables');p.Deliverables.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(s=>list.append(el('li','',s)));body.append(list,el('p','timeline',p['Delivery Window']));}
   const actions=el('div','actions');actions.append(button(compact?'Scope ও বিস্তারিত দেখুন':'এই package-এর scope আলোচনা করি',()=>compact?goPackage(p['Package ID']):openEnquiry({packageId:p['Package ID']}),compact?'button secondary':'button'));body.append(actions);card.append(body);return card;}
-function renderProblems(){['homeProblems','packageGuidance'].forEach(id=>{const root=$('#'+id);root.replaceChildren();problems.forEach((p,i)=>{const b=button(p[0],()=>{state.problem=i;renderProblems();},'problem');b.setAttribute('aria-pressed',String(state.problem===i));root.append(b);});});['recommendation','packageRecommendation'].forEach(id=>{const root=$('#'+id);root.replaceChildren();if(state.problem<0)return;const [label,pid,copy]=problems[state.problem],p=activePackage(pid),box=el('div','recommendation');box.append(el('h3','',label),el('p','',copy));if(p){box.append(el('p','',p['Package Name']+' · '+p.Price));const actions=el('div','actions');actions.append(button('Package-এর scope দেখুন',()=>goPackage(pid)));const text=pid==='PKG-DIAG'?p.Price+'-তে Diagnostics নিতে চাই':'এই package-এর scope আলোচনা করি';actions.append(button(text,()=>openEnquiry({packageId:pid}),'button'));box.append(actions);}else{box.append(el('p','small muted','সংশ্লিষ্ট active package এখন দেখানো যাচ্ছে না। প্রয়োজন নিয়ে সাধারণ enquiry করতে পারেন।'),button('সাধারণ enquiry',()=>openEnquiry({})));}root.append(box);});}
+let dynamicProblems = []; 
+
+function renderProblems() {
+  if (state.data.Packages) {
+    const groups = {};
+    state.data.Packages.forEach(p => {
+      const probTitle = p['Problem'];
+      if (!probTitle) return; 
+      if (!groups[probTitle]) {
+        groups[probTitle] = { label: probTitle, copy: p['Problem Description'] || '', packages: [] };
+      }
+      groups[probTitle].packages.push(p); 
+    });
+    dynamicProblems = Object.values(groups);
+  }
+
+  ['homeProblems', 'packageGuidance'].forEach(id => {
+    const root = $('#' + id);
+    if (!root) return;
+    root.replaceChildren();
+    dynamicProblems.forEach((dp, i) => {
+      const b = button(dp.label, () => { state.problem = i; renderProblems(); }, 'problem');
+      b.setAttribute('aria-pressed', String(state.problem === i));
+      root.append(b);
+    });
+  });
+
+  ['recommendation', 'packageRecommendation'].forEach(id => {
+    const root = $('#' + id);
+    if (!root) return;
+    root.replaceChildren();
+    if (state.problem < 0 || !dynamicProblems[state.problem]) return;
+
+    const dp = dynamicProblems[state.problem];
+    const box = el('div', 'recommendation');
+    box.append(el('h3', '', dp.label), el('p', '', dp.copy)); 
+
+    if (dp.packages.length > 0) {
+      dp.packages.forEach(p => {
+        box.append(el('p', '', p['Package Name'] + ' · ' + p.Price));
+        const actions = el('div', 'actions');
+        actions.append(button('Package-এর scope দেখুন', () => goPackage(p['Package ID'])));
+        actions.append(button('এই package-এর scope আলোচনা করি', () => openEnquiry({ packageId: p['Package ID'] }), 'button'));
+        box.append(actions);
+      });
+    } else {
+      box.append(el('p', 'small muted', 'সংশ্লিষ্ট active package এখন দেখানো যাচ্ছে না।'), button('সাধারণ enquiry', () => openEnquiry({})));
+    }
+    root.append(box);
+  });
+}
 function renderFilters(){const root=$('#filters');root.replaceChildren();const list=state.data.Lists.filter(l=>l['List Name']==='Solution Category');const vals=[['All','All'],...list.map(l=>[l['Allowed Value'],l['Display Label']])];if(state.data.Projects.some(p=>category(p)==='Other'))vals.push(['Other','Other']);if(!vals.some(x=>x[0]===state.filter))state.filter='All';vals.forEach(([value,label])=>{const b=button(label,()=>{state.filter=value;renderFilters();renderLab();},'filter');b.setAttribute('aria-pressed',String(value===state.filter));root.append(b);});}
 function renderLab(){const root=$('#labProjects');if(collectionState('Projects',root,'এখনও কোনো demo প্রকাশিত হয়নি। বাস্তব URL ও যাচাইয়ের তথ্য অনুমোদনের পর এখানে দেখা যাবে।'))return;const rows=state.data.Projects.filter(p=>state.filter==='All'||(state.filter==='Other'?category(p)==='Other':p['Solution Category']===state.filter));if(!rows.length){root.append(empty('এই category-তে এখন কোনো প্রকাশিত কাজ নেই। All বেছে অন্য কাজ দেখুন।'));return;}const groups=[['Featured published demos',rows.filter(featured).sort(byRank)],['Project feed',rows.filter(p=>!featured(p))]];groups.forEach(([title,items])=>{if(!items.length)return;root.append(el('h2','feed-title',title));const grid=el('div','grid');items.forEach(p=>grid.append(projectCard(p)));root.append(grid);});}
 function renderAll(){renderProblems();renderFilters();renderLab();const hp=$('#homeProjects');if(!collectionState('Projects',hp,'এখনও প্রকাশিত demo নেই। Real asset ও verification-এর পর Live Lab পূর্ণ হবে।')){const rows=state.data.Projects.filter(p=>featured(p)&&p['Evidence Type']==='Live Demo').sort(byRank).slice(0,3);rows.forEach(p=>hp.append(projectCard(p)));if(!rows.length)hp.append(empty('এই মুহূর্তে featured Live Demo নেই। Live Lab-এ অন্য প্রকাশিত কাজ দেখতে পারেন।'));}
