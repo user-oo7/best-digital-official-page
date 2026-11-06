@@ -272,10 +272,86 @@ img, svg { display: block; max-width: 100%; }
   color: #38bdf8;
   background: rgba(255, 255, 255, 0.05);
 }
-
+/* ==========================================================================
+   MOBILE HEADER FIX: মেনু বাটন স্ক্রিনের সামনে স্পষ্ট রাখার সমাধান
+   ========================================================================== */
 @media (max-width: 880px) {
-  .floating-nav, .nav-cta-btn { display: none; }
-  .menu-toggle-btn { display: block; }
+  .floating-nav {
+    display: none !important;
+  }
+
+  .nav-container {
+    width: 100% !important;
+    padding: 0 16px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .identity {
+    max-width: 65%;
+    font-size: 0.92rem;
+  }
+
+  .mark {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .nav-cta-btn {
+    display: none !important; 
+  }
+
+  .menu-toggle-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 10px;
+    color: #ffffff !important;
+    font-size: 1.3rem;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .menu-toggle-btn:active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: scale(0.95);
+  }
+
+  .mobile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 16px;
+    right: 16px;
+    width: auto;
+    background: rgba(14, 17, 26, 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 18px;
+    z-index: 100;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+  }
+
+  .mobile-dropdown a {
+    display: block;
+    color: #f1f5f9;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: left;
+  }
+
+  .mobile-dropdown a:last-of-type {
+    border-bottom: none;
+  }
 }
 
 /* ==========================================================================
