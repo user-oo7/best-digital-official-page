@@ -1634,9 +1634,23 @@ function contract(x){if(!x||x.schemaVersion!==1||!x.data||!x.status||!x.generate
 }
 async function loadContent(){if(state.loading||Date.now()-state.lastAttempt<10000)return;const url=endpoint();if(!url){$('#loadStatus').textContent='সেটআপবাকি:CMSendpointযুক্তহয়নি।Enquiryপাঠানোএখনবন্ধআছে।';$('#refresh').disabled=true;renderAll();return;}state.lastAttempt=Date.now();state.loading=true;throttleRefresh();$('#loadStatus').textContent='প্রকাশিত content লোড হচ্ছে…';if(!state.loaded)renderAll();try{let data;for(let attempt=0;attempt<2;attempt++){try{data=contract(await fetchTimed(url+'?action=content'));break;}catch(error){if(attempt||error.message==='CONTRACT')throw error;await new Promise(r=>setTimeout(r,650));}}state.data=data.data;state.status=data.status;state.loaded=true;const failed=Object.keys(data.status).filter(k=>!data.status[k].ok);$('#loadStatus').textContent=failed.length?'কিছু content পাওয়া যায়নি: '+failed.join(', ')+'. আবার লোড করতে পারেন।':'প্রকাশিত content · '+time(data.generatedAt);state.loading=false;renderAll();refreshOpenCase();}catch(_){$('#loadStatus').textContent=state.loaded?'Refresh হয়নি। আগের in-memory content দেখানো হচ্ছে; সর্বশেষ অবস্থা নিশ্চিত নয়।':'Content লোড করা যায়নি। আবার লোড করুন অথবা configured contact ব্যবহার করুন।';state.loading=false;if(!state.loaded)renderAll();}finally{state.loading=false;}}
 const routeIDs=['home','lab','packages','about'];
-function route(focus=true){const raw=location.hash.slice(1),id=routeIDs.includes(raw)?raw:'home';if(raw!==id)history.replaceState(null,'','#'+id);state.view=id;
-$('[data-view]').forEach(n=>n.hidden=n.id!==id);
-$('[data-route]').forEach(a=>{if(a.dataset.route===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});$('#navigation').classList.remove('open');$('#menu').setAttribute('aria-expanded','false');document.title=CONFIG.brand+'  '+({home:'Home',lab:'Case Studies & Live Lab',packages:'Packages & Systems',about:'About & Tech Stack'}[id]);if(focus){$('#'+id+' h1').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}}
+function route(focus=true){
+  const raw=location.hash.slice(1),id=routeIDs.includes(raw)?raw:'home';
+  if(raw!==id)history.replaceState(null,'','#'+id);
+  state.view=id;
+  $$('[data-view]').forEach(view=>view.hidden=view.id!==id);
+  $$('[data-route]').forEach(link=>{
+    if(link.dataset.route===id)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  });
+  $('#navigation').classList.remove('open');
+  $('#menu').setAttribute('aria-expanded','false');
+  document.title=CONFIG.brand+'  '+({home:'Home',lab:'Case Studies & Live Lab',packages:'Packages & Systems',about:'About & Tech Stack'}[id]);
+  if(focus){
+    $('#'+id+' h1').focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+}
 function goPackage(id){location.hash='packages';setTimeout(()=>{const card=$$('[data-package]').find(n=>n.closest('#packageFeed')&&n.dataset.package===id);if(card){card.tabIndex=-1;card.scrollIntoView({block:'center',behavior:'instant'});card.focus({preventScroll:true});}},30);}
 const openers=new WeakMap();function showDialog(d){openers.set(d,document.activeElement);d.showModal();document.body.classList.add('modal-open');const focus=d.querySelector('h2[tabindex],input:not([type=hidden]),button');if(focus)focus.focus({preventScroll:true});}
 $$('dialog').forEach(d=>{d.querySelector('[data-close]').addEventListener('click',()=>d.close());d.addEventListener('close',()=>{if(!$$('dialog[open]').length)document.body.classList.remove('modal-open');const opener=openers.get(d);if(opener?.isConnected&&!opener.closest('[hidden]'))opener.focus({preventScroll:true});});});
@@ -1669,8 +1683,9 @@ function updateContext() {
   $('#clearContext').hidden = !pid;
 }
 function clearErrors(){
-$('.error').forEach(n=>n.textContent='');
-$('[aria-invalid]').forEach(n=>n.removeAttribute('aria-invalid'));}
+  $$('.error').forEach(n=>n.textContent='');
+  $$('[aria-invalid]').forEach(n=>n.removeAttribute('aria-invalid'));
+}
 function fieldError(name,message){const node=$('#'+name+'Error'),input=form.elements[name];if(node)node.textContent=message;if(input&&input.setAttribute)input.setAttribute('aria-invalid','true');}
 function normalizeContact(s,method){s=s.trim();if(method==='Email')return /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(s)?s.toLowerCase():'';s=s.replace(/[০-৯]/g,c=>String('০১২৩৪৫৬৭৮৯'.indexOf(c))).replace(/[\s().-]/g,'');if(s.startsWith('00'))s='+'+s.slice(2);return /^01[3-9]\d{8}$/.test(s)||/^\+[1-9]\d{7,14}$/.test(s)?s:'';}
 function prepare() {
@@ -1793,7 +1808,7 @@ window.addEventListener('keydown', e => {
 
 $('#refresh').addEventListener('click', () => loadContent());
 window.addEventListener('hashchange', () => route());
-$$('[data-brand]').forEach(n => n.textContent = CONFIG.brand);
+$('.header-outer [data-brand]').textContent = CONFIG.brand;
 
 $$('[data-contacts]').forEach(root => {
   const phone = CONFIG.whatsapp.replace(/\D/g, '');
